@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>电子车间信息管理系统</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon"/>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+    <!-- Ionicons -->
+    <!-- <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"> -->
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/adminlte.min.css">
+    <!-- icheck bootstrap -->
+    <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+    <!-- Google Font: Source Sans Pro -->
+    <!-- <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet"> -->
+    <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.min.css">
+    <link rel="stylesheet" href="css/common.css">
+</head>
+<body class="hold-transition login-page">
+
+<div class="login-box">
+    <div class="login-logo">
+        <a class="text-white text-bold">电子车间信息管理系统</a>
+    </div>
+    <div class="card" id="loginDiv">
+        <div class="card-body login-card-body">
+            <p id="msg" class="login-box-msg"></p>
+            <div class="input-group mb-3">
+                <input id="account" type="text" class="form-control" placeholder="账号" value="">
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-user"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="input-group mb-3">
+                <input id="password" type="password" class="form-control" placeholder="密码" value="">
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-lock"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4 offset-8">
+                    <button id="submit" type="button"
+                            class="btn btn-primary btn-block">登录
+                    </button>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<!-- jQuery -->
+<script src="plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/js.cookie-2.2.1.min.js"></script>
+<script src="plugins/sweetalert2/sweetalert2.min.js"></script>
+<script src="js/common.js"></script>
+<script>
+
+    $('#loginBtn').click(function () {
+        $('#loginDiv').show();
+        $('#registerDiv').hide();
+    });
+
+    $('#registerBtn').click(function () {
+        $('#loginDiv').hide();
+        $('#registerDiv').show();
+    });
+
+    $("#submit").on("click", function () {
+        $.ajax({
+            url: "api/login",
+            type: "GET",
+            data: {
+                account: $("#account").val(),
+                password: $("#password").val()
+            },
+            success: function (result) {
+                if (result.status === "success") {
+                    //Cookies.set('user', result.data, { expires: 7 });
+                    //Cookies.getJSON('user').userId
+                    storage.set("user", result.data);
+                    window.location.href = "index";
+                } else {
+                    $("#msg").text(result.message);
+                }
+            }
+        });
+    });
+
+    $("#submitNew").on("click", function () {
+        if ($("#accountNew").val().length === 0) {
+            $("#msgNew").text("账号不能为空");
+            return false;
+        }
+        if ($("#passwordNew").val().length === 0) {
+            $("#msgNew").text("密码不能为空");
+            return false;
+        }
+        if ($("#passwordNew").val() != $("#passwordNewConf").val()) {
+            $("#msgNew").text("两次密码输入不一致");
+            return false;
+        }
+        if ($("#nameNew").val().length === 0) {
+            $("#msgNew").text("姓名不能为空");
+            return false;
+        }
+        if ($("#userPhone").val().length === 0) {
+            $("#msgNew").text("联系方式不能为空");
+            return false;
+        }
+        $.ajax({
+            url: "api/register",
+            type: "POST",
+            data: {
+                account: $("#accountNew").val(),
+                password: $("#passwordNew").val(),
+                name: $("#nameNew").val(),
+                phone: $("#userPhone").val(),
+                sex: $("#userSex").val(),
+                type: 1,
+
+            },
+            success: function (result) {
+                if (result.status === "success") {
+                    //setCookie("user", result.data.name);
+                    $('#loginDiv').show();
+                    $('#registerDiv').hide();
+                    $("#msg").text(result.message);
+                } else {
+                    $("#msgNew").text(result.message);
+                }
+            }
+        });
+    });
+    $(document).keydown(function (event) {
+        //keyCode=13是回车键
+        if (event.keyCode === 13) {
+            $('#submit').click();
+        }
+    });
+</script>
+</body>
+</html>

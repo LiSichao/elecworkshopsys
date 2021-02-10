@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>我的信息</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="index">首页</a></li>
+                    <li class="breadcrumb-item active">我的信息</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-info card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            修改信息
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <input id="userId" type="hidden" class="form-control" disabled>
+                        <div class="form-group">
+                            <label>账号：</label>
+                            <input id="userAccount" type="text" class="form-control" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>密码：</label>
+                            <input id="userPassword" type="password" class="form-control" placeholder="******">
+                        </div>
+                        <div class="form-group">
+                            <label>姓名：</label>
+                            <input id="userName" type="text" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>性别：</label>
+                            <select id="userSex" class="form-control">
+                                <option>男</option>
+                                <option>女</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>联系方式：</label>
+                            <input id="userPhone" type="text" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>账号类型：</label>
+                            <input id="userType" type="text" class="form-control" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>介绍：</label>
+                            <textarea id="userRemark" class="form-control"></textarea>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button id="submit" type="button" class="btn btn-info float-right">提交修改</button>
+                    </div>
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col-->
+        </div>
+        <!-- ./row -->
+    </div>
+</section>
+<myscript>
+    <script type="text/javascript">
+        $(function () {
+            getUserInfo();
+        });
+
+        function getUserInfo() {
+            $.ajax({
+                url: "api/user/" + storage.get('user').id,
+                type: "GET",
+                success: function (result) {
+                    $("#userId").val(result.data.id);
+                    $("#userAccount").val(result.data.account);
+                    $("#userName").val(result.data.name);
+                    $("#userSex").val(result.data.sex);
+                    $("#userPhone").val(result.data.phone);
+                    $("#userRemark").val(result.data.remark);
+                    var type;
+                    switch (result.data.type) {
+                        case 0:
+                            type = '管理员';
+                            break;
+                        case 1:
+                            type = '普通用户';
+                    }
+                    $("#userType").val(type);
+                }
+            });
+        }
+
+        $("#submit").click(function () {
+            submitInfo();
+        });
+
+        function submitInfo() {
+            $.ajax({
+                url: "api/user",
+                type: "PUT",
+                data: {
+                    id: $("#userId").val(),
+                    name: $("#userName").val(),
+                    password: $("#userPassword").val(),
+                    sex: $("#userSex").val(),
+                    phone: $("#userPhone").val(),
+                    remark: $("#userRemark").val()
+                },
+                success: function (result) {
+                    Toast.fire({text: result.message});
+                    getUserInfo();
+                }
+            });
+        }
+
+    </script>
+</myscript>
+</body>
+</html>

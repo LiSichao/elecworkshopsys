@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="plugins/fullcalendar/main.min.css">
+    <link rel="stylesheet" href="plugins/fullcalendar-daygrid/main.min.css">
+    <link rel="stylesheet" href="plugins/fullcalendar-timegrid/main.min.css">
+    <link rel="stylesheet" href="plugins/fullcalendar-bootstrap/main.min.css">
+    <link rel="stylesheet" href="plugins/daterangepicker/daterangepicker.css">
+</head>
+<body>
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>备忘信息</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="index">首页</a></li>
+                    <li class="breadcrumb-item active">备忘录</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+</section>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-info card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">列表</h3>
+                        <div class="card-tools">
+                            <button id="btnAdd" type="button" class="btn btn-info btn-sm">新增</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="calendar"></div>
+
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="modalAdd">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>提醒内容:<span class="text-danger"> *</span></label>
+                    <textarea name="detail" type="text" rows="3" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>提醒日期:</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="far fa-calendar-alt"></i>
+                      </span>
+                        </div>
+                        <input name="date" type="text" class="form-control float-right date">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal" id="submitAdd">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDetail">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>提醒内容:<span class="text-danger"> *</span></label>
+                    <textarea name="detail" type="text" rows="3" class="form-control" disabled></textarea>
+                </div>
+                <div class="form-group">
+                    <label>提醒日期:</label>
+                    <input name="date" type="text" class="form-control" disabled>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnDel">删除</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<myscript>
+    <script src="plugins/moment/moment.min.js"></script>
+    <script src="plugins/moment/locale/zh-cn.js"></script>
+    <script src="plugins/fullcalendar/main.min.js"></script>
+    <script src="plugins/fullcalendar/locales/zh-cn.js"></script>
+    <script src="plugins/fullcalendar-daygrid/main.min.js"></script>
+    <script src="plugins/fullcalendar-timegrid/main.min.js"></script>
+    <script src="plugins/fullcalendar-interaction/main.min.js"></script>
+    <script src="plugins/fullcalendar-bootstrap/main.min.js"></script>
+    <script src="plugins/daterangepicker/daterangepicker.js"></script>
+    <script type="text/javascript">
+        var calendar
+        $(function () {
+
+            var date = new Date()
+            var d = date.getDate(),
+                m = date.getMonth(),
+                y = date.getFullYear()
+
+            var Calendar = FullCalendar.Calendar;
+            var checkbox = document.getElementById('drop-remove');
+            var calendarEl = document.getElementById('calendar');
+
+
+            calendar = new Calendar(calendarEl, {
+                plugins: ['bootstrap', 'interaction', 'dayGrid', 'timeGrid'],
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                'themeSystem': 'bootstrap',
+                locale: 'zh-cn',
+                //Random default events
+                events: [],
+                //editable  : true,
+                //droppable : true, // this allows things to be dropped onto the calendar !!!
+                drop: function (info) {
+                    // is the "remove after drop" checkbox checked?
+                    if (checkbox.checked) {
+                        // if so, remove the element from the "Draggable Events" list
+                        info.draggedEl.parentNode.removeChild(info.draggedEl);
+                    }
+                },
+                eventClick: function (calEvent) {
+                    getMemo(calEvent.event.id);
+                    console.log(calEvent.event.id);
+
+                }
+            });
+
+            calendar.render();
+            // $('#calendar').fullCalendar()
+
+            console.log(calendar.getEvents())
+
+
+            $('.date').daterangepicker({
+                locale: {
+                    format: "YYYY-MM-DD",
+                },
+                singleDatePicker: true,
+            });
+
+            getMemoList();
+
+        });
+
+        function getMemoList() {
+            $.ajax({
+                url: "api/memo",
+                type: "GET",
+                success: function (result) {
+                    var events = calendar.getEvents();
+                    for (let i = 0; i < events.length; i++) {
+                        events[i].remove();
+                    }
+                    $.each(result.data, function (index, item) {
+                        calendar.addEvent({
+                            title: item.detail,
+                            start: new Date(item.date),
+                            backgroundColor: '#3c8dbc', //Primary (light-blue)
+                            borderColor: '#3c8dbc', //Primary (light-blue)
+                            allDay: true,
+                            id: item.id
+                        });
+                    })
+
+                }
+            });
+        }
+
+
+        $(document).on("click", "#btnAdd", function () {
+            $("#modalAdd").modal({
+                backdrop: "static"
+            });
+        });
+
+        $(document).on('click', '#submitAdd', function () {
+            var data = $("#modalAdd :input").serializeJSON();
+            data.userId = storage.get('user').id;
+            data.userDeptId = storage.get('user').dept.id;
+            if (data.detail === "") {
+                Toast.fire({text: '信息填写不完整'});
+                return false;
+            }
+            $.ajax({
+                url: "api/memo",
+                type: "POST",
+                data: data,
+                success: function (result) {
+                    if (result.status === 'success') {
+                        Toast.fire({text: result.message});
+                        getMemoList();
+                    } else {
+                        Toast.fire({text: result.message});
+                    }
+                }
+            });
+        });
+
+        function getMemo(id) {
+            $("#modalDetail").modal({
+                backdrop: "static"
+            });
+            $.ajax({
+                url: "api/memo/" + id,
+                type: "GET",
+                success: function (result) {
+                    if (result.status === 'success') {
+                        $("#modalDetail :input[name='detail']").val(result.data.detail);
+                        $("#modalDetail :input[name='date']").val(result.data.date);
+                        $("#btnDel").data("id", result.data.id);
+                    } else {
+                        Toast.fire({text: result.message});
+                    }
+                }
+            });
+        }
+
+        $(document).on('click', '#btnDel', function () {
+            $.ajax({
+                url: "api/memo/" + $("#btnDel").data("id"),
+                type: "DELETE",
+                success: function (result) {
+                    if (result.status === 'success') {
+                        Toast.fire({text: result.message});
+                        getMemoList();
+                    } else {
+                        Toast.fire({text: result.message});
+                    }
+                }
+            });
+        });
+    </script>
+</myscript>
+</body>
+</html>

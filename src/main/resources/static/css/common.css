@@ -1,0 +1,13 @@
+.login-page {
+    background: url(../img/bg.jpg) no-repeat 0px 0px;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+}
+th {
+    white-space: nowrap;
+}
+
+.custom-file-label::after {
+    content: "浏览";
+}

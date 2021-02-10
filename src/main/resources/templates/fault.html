@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="plugins/daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+    <link rel="stylesheet" href="js/tippy/tippy.css">
+    <style>
+        .bg-warning, .badge-warning {
+            color: white !important
+        }
+
+        .over {
+            max-width: 110px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>故障信息</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="index">首页</a></li>
+                    <li class="breadcrumb-item active">故障信息</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+</section>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-lightblue card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">查询</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse"><i
+                                    class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div id="search" class="card-body">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <label> 故障地点:</label>
+                                <input name="place" type="text" class="form-control">
+                            </div>
+                            <div class="col-md-2">
+                                <label> 故障现象:</label>
+                                <input name="detail" type="text" class="form-control">
+                            </div>
+                            <div class="col-md-2">
+                                <label> 状态:</label>
+                                <div class="input-group">
+                                    <select name="state" class="form-control">
+                                        <option value="">全部</option>
+                                        <option value="1">待处理</option>
+                                        <option value="2">处理中</option>
+                                        <option value="3">已处理</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label> 受理人:</label>
+                                        <div class="input-group">
+                                            <select name="userId" class="form-control">
+                                                <option value="">全部</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label> 受理工区:</label>
+                                        <div class="input-group">
+                                            <select name="userDeptId" class="form-control">
+                                                <option value="">全部</option>
+                                                <option value="128">列控联锁检修工区</option>
+                                                <option value="167">CTCTDCS检修工区</option>
+                                                <option value="182">信息化维护工区</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>起始日期:</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </span>
+                                            </div>
+                                            <input name="dateStart" type="text" class="form-control float-right date dateSearch">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>终止日期:</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </span>
+                                            </div>
+                                            <input name="dateEnd" type="text" class="form-control float-right date dateSearch">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-footer">
+                        <button id="btnReset" type="button" class="btn btn-default ">重置</button>
+                        <button id="submitSearch" type="button" class="btn btn-info float-right">查询</button>
+                    </div>
+                </div>
+                <!-- /.card -->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-info card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">列表</h3>
+                        <div class="card-tools">
+                            <button id="btnExport" type="button" class="btn btn-default btn-sm">导出</button>
+                            <button id="btnAdd" type="button" class="btn btn-info btn-sm">新增</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table id="recordTable" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>故障编号</th>
+                                <th>状态</th>
+                                <th>故障地点</th>
+                                <th>故障现象</th>
+                                <th>提报日期</th>
+                                <th>通知人</th>
+                                <th>受理人</th>
+                                <th style="width:260px;"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div id="paginationInfo" class="dataTables_info text-muted"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="paginationArea"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="modalAdd">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>故障现象<span class="text-danger"> *</span></label>
+                    <textarea name="detail" type="text" rows="3" class="form-control"></textarea>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>车间/科室</label>
+                            <select name="deptId" class="form-control deptId"></select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>车站</label>
+                            <select name="stationId" class="form-control">
+                                <option value=''>请选择</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>通知人<span class="text-danger"> *</span></label>
+                    <input name="staff" type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>提报日期:</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="far fa-calendar-alt"></i>
+                      </span>
+                        </div>
+                        <input name="datetime" type="text" class="form-control float-right datetime">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>受理人</label>
+                    <input type="text" class="form-control userInfo" disabled>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal" id="submitAdd">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEdit">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-body">
+                <input name="id" type="hidden" class="form-control">
+                <div class="form-group">
+                    <label>故障现象<span class="text-danger"> *</span></label>
+                    <textarea name="detail" type="text" rows="3" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>通知人<span class="text-danger"> *</span></label>
+                    <input name="staff" type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>提报日期:</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="far fa-calendar-alt"></i>
+                      </span>
+                        </div>
+                        <input name="datetime" type="text" class="form-control float-right datetime">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal" id="submitEdit">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalProcess">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-body">
+                <input name="faultId" type="hidden" class="form-control">
+                <div class="form-group">
+                    <label>状态</label>
+                    <select id="state" class="form-control">
+                        <option value="2">处理中</option>
+                        <option value="3">已处理</option>
+                    </select>
+                </div>
+                <div id="reason" class="form-group" style="display: none;">
+                    <label>故障原因<span class="text-danger"> *</span></label>
+                    <textarea type="text" rows="3" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>处理结果<span class="text-danger"> *</span></label>
+                    <textarea name="detail" type="text" rows="3" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <div class="icheck-primary d-inline">
+                        <input type="checkbox" id="checkbox">
+                        <label for="checkbox">
+                            提醒我
+                        </label>
+                    </div>
+                </div>
+                <div id="notice" class="form-group" style="display: none;">
+                    <label>提醒日期:</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="far fa-calendar-alt"></i>
+                      </span>
+                        </div>
+                        <input name="noticeDate" type="text" class="form-control float-right date">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>处理人</label>
+                    <input type="text" class="form-control userInfo" disabled>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal" id="submitProcess">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDetail">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-book"></i> 故障信息
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-4">故障编号</dt>
+                            <dd id="detail-code" class="col-8"></dd>
+                            <dt class="col-4">状态</dt>
+                            <dd id="detail-state" class="col-8"></dd>
+                            <dt class="col-4">故障地点</dt>
+                            <dd id="detail-place" class="col-8"></dd>
+                            <dt class="col-4">故障现象</dt>
+                            <dd id="detail-detail" class="col-8"></dd>
+                            <dt class="col-4">提报日期</dt>
+                            <dd id="detail-datetime" class="col-8"></dd>
+                            <dt class="col-4">通知人</dt>
+                            <dd id="detail-staff" class="col-8"></dd>
+                            <dt class="col-4">受理人</dt>
+                            <dd id="detail-user" class="col-8"></dd>
+                            <dt class="col-4">故障原因</dt>
+                            <dd id="detail-reason" class="col-8"></dd>
+                        </dl>
+                    </div>
+                </div>
+                <div id="process" class="timeline">
+
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDel">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>确认删除？</h5>
+            </div>
+            <input name="id" type="hidden" class="form-control">
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal" id="submitDel">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<myscript>
+    <script src="plugins/moment/moment.min.js"></script>
+    <script src="plugins/moment/locale/zh-cn.js"></script>
+    <script src="plugins/daterangepicker/daterangepicker.js"></script>
+    <script src="js/tippy/popper.min.js"></script>
+    <script src="js/tippy/tippy-bundle.umd.min.js"></script>
+    <script id="tmpl" type="text/x-template">
+        {{for data}}
+        <tr>
+            <td>{{:code}}</td>
+            <td>
+                {{if state==1}}
+                <span class="badge badge-danger text-sm">待处理</span>
+                {{else state==2}}
+                <span class="badge badge-warning text-sm">处理中</span>
+                {{else state==3}}
+                <span class="badge badge-success text-sm">已处理</span>
+                {{/if}}
+            </td>
+            <td>{{:station?station.name:dept.name}}</td>
+            <td class="over" data-tippy-content="{{:detail}}">{{:detail}}</td>
+            <td>{{:datetime}}</td>
+            <td>{{:staff}}</td>
+            <td>{{:user.name}}</td>
+            <td class="text-right">
+                <button class="btn btn-info btn-sm btnDetail" data-id="{{:id}}"
+                        data-detail="{{:detail}}" data-datetime="{{:datetime}}"
+                        data-staff="{{:staff}}" data-state="{{:state}}" data-code="{{:code}}"
+                        data-user="{{:user.name}}" data-reason="{{:reason}}"
+                        data-place="{{:station?station.name:dept.name}}">查看
+                </button>
+
+                <button class="btn btn-primary btn-sm btnProcess {{if state==3}}disabled{{/if}}"
+                        data-fault-id="{{:id}}">处理
+                </button>
+                <button type="button" class="btn btn-default dropdown-toggle btn-sm"
+                        data-toggle="dropdown">其他
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item dropdown-footer btnEdit {{if state==3}}disabled{{/if}}"
+                       href="javascript:void(0)"
+                       data-id="{{:id}}" data-detail="{{:detail}}" data-datetime="{{:datetime}}"
+                       data-staff="{{:staff}}"><i class="fa fa-wrench"></i> 修改
+                    </a>
+
+                    <a class="dropdown-item dropdown-footer btnDel {{if ~root.userType!=0}}disabled{{/if}}"
+                       href="javascript:void(0)" data-id="{{:id}}">
+                        <i class="fa fa-trash"></i> 删除
+                    </a>
+                </div>
+
+            </td>
+        </tr>
+        {{/for}}
+    </script>
+    <script id="tmpl2" type="text/x-template">
+        <div class="time-label mt-3">
+            <span class="bg-info">处理进度</span>
+        </div>
+        {{for data}}
+        <div>
+            <i class="fas fa-user bg-info"></i>
+            <div class="timeline-item">
+                <span class="time"><i class="fas fa-clock"></i> {{:datetime}}</span>
+                <h3 class="timeline-header"><a>{{:user.name}}</a></h3>
+                <div class="timeline-body">
+                    {{:detail}}
+                </div>
+            </div>
+        </div>
+        {{/for}}
+        <div>
+            {{if faultState==1}}
+            <i class="fas fa-clock bg-danger"></i>
+            {{else faultState==2}}
+            <i class="fas fa-clock bg-warning"></i>
+            {{else faultState==3}}
+            <i class="fas fa-check bg-success"></i>
+            {{/if}}
+        </div>
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            toPage(pageNum);
+            getUser();
+            getWorkshop();
+            $('.datetime').daterangepicker({
+                locale: {
+                    format: "YYYY-MM-DD HH:mm:ss",
+                    applyLabel: "确定",
+                    cancelLabel: "取消"
+                },
+                timePicker24Hour: true,
+                singleDatePicker: true,
+                timePicker: true
+            });
+
+            $('.date').daterangepicker({
+                locale: {
+                    format: "YYYY-MM-DD",
+                },
+                singleDatePicker: true,
+            });
+            $('.dateSearch').val("");
+        });
+
+        function toPage(pn) {
+            pageNum = pn;
+            var data = $("#search :input").serializeJSON();
+            data.pageNum = pn;
+            data.pageSize = 10;
+            $.ajax({
+                url: "api/fault",
+                type: "GET",
+                data: data,
+                success: function (result) {
+                    result.userType = storage.get("user").type;
+
+                    $("#recordTable tbody").empty().append($("#tmpl").render(result));
+                    buildPageNav(result);
+                    tippy('[data-tippy-content]', {delay: [800, 0]});
+                }
+            });
+        }
+
+        function getUser() {
+            $.ajax({
+                url: "api/user",
+                type: "GET",
+                success: function (result) {
+                    $.each(result.data, function (index, item) {
+                        var option = $("<option></option>").attr("value", item.id).text(item.name);
+                        $("#search :input[name='userId']").append(option);
+                    });
+                }
+            });
+        }
+
+        function getProcess(faultId, faultState) {
+            $.ajax({
+                url: "api/process",
+                type: "GET",
+                data: {
+                    faultId: faultId
+                },
+                success: function (result) {
+                    result.faultState = faultState;
+                    $("#process").empty().append($("#tmpl2").render(result));
+                }
+            });
+        }
+
+        function getWorkshop() {
+            $.ajax({
+                url: "api/dept",
+                type: "GET",
+                data: {
+                    level: 3
+                },
+                success: function (result) {
+                    $.each(result.data, function (index, item) {
+                        var option = $("<option></option>").attr("value", item.id).text(item.name);
+                        $("#modalAdd :input[name='deptId']").append(option);
+                    });
+
+                }
+            });
+        }
+
+        function getStation(deptId) {
+            $.ajax({
+                url: "api/station",
+                type: "GET",
+                data: {
+                    deptId: deptId
+                },
+                success: function (result) {
+                    $("#modalAdd :input[name='stationId'] :gt(0)").remove();
+                    $.each(result.data, function (index, item) {
+                        var option = $("<option></option>").attr("value", item.id).text(item.name);
+                        $("#modalAdd :input[name='stationId']").append(option);
+                    });
+
+                }
+            });
+        }
+
+        $(document).on("click", "#btnAdd", function () {
+            $("#modalAdd").modal({
+                backdrop: "static"
+            });
+            $('#modalAdd input,#modalAdd textarea').val('');
+            $("#modalAdd input[name='datetime']").val(moment().format("YYYY-MM-DD HH:mm:ss"));
+            $(".userInfo").val(storage.get('user').name);
+        });
+
+        $(document).on('click', '#submitAdd', function () {
+            var data = $("#modalAdd :input").serializeJSON();
+            data.userId = storage.get('user').id;
+            data.userDeptId = storage.get('user').dept.id;
+            if (data.detail === "") {
+                Toast.fire({text: '信息填写不完整'});
+                return false;
+            }
+            $.ajax({
+                url: "api/fault",
+                type: "POST",
+                data: data,
+                success: function (result) {
+                    if (result.status === 'success') {
+                        Toast.fire({text: result.message});
+                        toPage(pageNum);
+                    } else {
+                        Toast.fire({text: result.message});
+                    }
+                }
+            });
+        });
+
+        $(document).on("click", ".btnEdit", function () {
+            if ($(this).hasClass("disabled")) {
+                return false;
+            }
+            $("#modalEdit").modal({
+                backdrop: "static"
+            });
+            $.each($(this).data(), function (name, value) {
+                $("#modalEdit :input[name='" + name + "']").val(value);
+            })
+        });
+
+        $(document).on('click', '#submitEdit', function () {
+            var data = $("#modalEdit :input").serializeJSON();
+            $.ajax({
+                url: "api/fault",
+                type: "PUT",
+                data: data,
+                success: function (result) {
+                    Toast.fire({text: result.message});
+                    toPage(pageNum);
+                }
+            });
+        });
+
+        $(document).on("click", ".btnDetail", function () {
+            getProcess($(this).data("id"), $(this).data("state"));
+            $("#modalDetail").modal({
+                backdrop: "static"
+            });
+            $.each($(this).data(), function (name, value) {
+                if (name == "state") {
+                    switch (value) {
+                        case 1:
+                            value = "待处理"
+                            break;
+                        case 2:
+                            value = "处理中"
+                            break;
+                        case 3:
+                            value = "已处理"
+                    }
+                }
+
+                $("#detail-" + name).text(value);
+            })
+        });
+
+        $(document).on('click', '.btnDel', function () {
+            if ($(this).hasClass("disabled")) {
+                return false;
+            }
+            $("#modalDel").modal({
+                backdrop: "static"
+            });
+            $("#modalDel :input[name='id']").val($(this).data("id"));
+        });
+
+        $(document).on('click', '#submitDel', function () {
+            $.ajax({
+                url: "api/fault",
+                type: "PUT",
+                data: {
+                    id: $("#modalDel :input[name='id']").val(),
+                    state: 0,
+                },
+                success: function (result) {
+                    Toast.fire({text: "删除成功"});
+                    toPage(pageNum);
+                }
+            });
+        });
+
+        $(document).on("click", ".btnProcess", function () {
+            if ($(this).hasClass("disabled")) {
+                return false;
+            }
+            $("#modalProcess").modal({
+                backdrop: "static"
+            });
+
+            $('#modalProcess input,#modalProcess textarea').val('');
+            $.each($(this).data(), function (name, value) {
+                $("#modalProcess :input[name='" + name + "']").val(value);
+            })
+            $(".userInfo").val(storage.get('user').name);
+            $("#checkbox").prop("checked", false);
+            $("#notice,#reason").hide();
+            $("#state").val("2");
+        });
+
+        $(document).on('click', '#submitProcess', function () {
+            var data = $("#modalProcess :input").serializeJSON();
+            data.userId = storage.get('user').id;
+            data.notice = $("#checkbox").prop("checked") ? 1 : 0;
+            if (data.detail === "") {
+                Toast.fire({text: '信息填写不完整'});
+                return false;
+            }
+            $.ajax({
+                url: "api/process",
+                type: "POST",
+                data: data,
+                success: function (result) {
+                    if (result.status === 'success') {
+                        //Toast.fire({text: result.message});
+                        updateFault($("#modalProcess :input[name='faultId']").val())
+                    } else {
+                        Toast.fire({text: result.message});
+                    }
+                }
+            });
+        });
+
+        function updateFault(id) {
+            $.ajax({
+                url: "api/fault",
+                type: "PUT",
+                data: {
+                    id: id,
+                    state: $("#state").val(),
+                    reason: $("#reason :input").val()
+                },
+                success: function (result) {
+                    Toast.fire({text: result.message});
+                    toPage(pageNum);
+                }
+            });
+        }
+
+        $(document).on("change", ".deptId", function () {
+            console.log($(this).val());
+            getStation($(this).val());
+        })
+
+        $(document).on("click", "#checkbox", function () {
+            if ($("#checkbox").prop("checked")) {
+                $("#modalProcess input[name='noticeDate']").val(moment().format("YYYY-MM-DD"));
+                $("#notice").show();
+            } else {
+                $("#modalProcess input[name='noticeDate']").val("");
+                $("#notice").hide();
+            }
+        })
+
+        $(document).on("change", "#state", function () {
+            $("#state").val() == 3 ? $("#reason").show() : $("#reason").hide();
+        })
+
+        $(document).on("click", "#btnExport", function () {
+            window.open("api/fault/export?" + $("#search :input").serialize());
+        })
+
+        $(document).on("click", "#submitSearch", function () {
+            toPage(pageNum);
+        })
+
+        $(document).on("click", "#btnReset", function () {
+            $("#search :input").val("");
+            toPage(1);
+        })
+
+    </script>
+</myscript>
+</body>
+</html>

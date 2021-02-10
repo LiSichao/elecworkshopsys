@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>车站管理</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="index">首页</a></li>
+                    <li class="breadcrumb-item active">车站管理</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+</section>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-info card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">列表</h3>
+                        <div class="card-tools">
+                            <button id="btnAdd" type="button" class="btn btn-info btn-sm">新增</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table id="recordTable" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>站名</th>
+                                <th>所属车间</th>
+                                <th style="width:180px;"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div id="paginationInfo" class="dataTables_info text-muted"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="paginationArea"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="modalAdd">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>站名<span class="text-danger"> *</span></label>
+                    <input name="name" type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>所属车间</label>
+                    <select name="deptId" class="form-control"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal" id="submitAdd">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEdit">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-body">
+                <input name="id" type="hidden" class="form-control">
+                <div class="form-group">
+                    <label>站名</label>
+                    <input name="name" type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>所属车间</label>
+                    <select name="deptId" class="form-control"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal" id="submitEdit">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<myscript>
+    <script id="tmpl" type="text/x-template">
+        <tr>
+            <td>{{:name}}</td>
+            <td>{{:dept.name}}</td>
+            <td class="text-right">
+                <button class="btn btn-info btn-sm btnEdit" data-id="{{:id}}"
+                        data-name="{{:name}}" data-dept-id="{{:deptId}}">修改
+                </button>
+                <button class="btn btn-danger btn-sm btnDel" data-id="{{:id}}">删除</button>
+            </td>
+        </tr>
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            toPage(pageNum);
+            getDept();
+        });
+
+        function toPage(pn) {
+            pageNum = pn;
+            $.ajax({
+                url: "api/station",
+                type: "GET",
+                data: {
+                    pageNum: pn,
+                    pageSize: 10,
+                    state: 1
+                },
+                success: function (result) {
+                    $("#recordTable tbody").empty().append($("#tmpl").render(result.data));
+                    buildPageNav(result);
+                }
+            });
+        }
+
+        function getDept() {
+            $.ajax({
+                url: "api/dept",
+                type: "GET",
+                data: {
+                    level: 3,
+                    type: "车间"
+                },
+                success: function (result) {
+                    $.each(result.data, function (index, item) {
+                        var option = $("<option></option>").attr("value", item.id).text(item.name);
+                        $("#modalAdd :input[name='deptId'],#modalEdit :input[name='deptId']").append(option);
+                    });
+                }
+            });
+        }
+
+        $(document).on("click", "#btnAdd", function () {
+            $("#modalAdd").modal({
+                backdrop: "static"
+            });
+            $('#modalAdd input,#modalAdd textarea').val('');
+        });
+
+        $(document).on('click', '#submitAdd', function () {
+            let data = $("#modalAdd :input").serializeJSON();
+            if (data.name === "") {
+                Toast.fire({text: '信息填写不完整'});
+                return false;
+            }
+            $.ajax({
+                url: "api/station",
+                type: "POST",
+                data: data,
+                success: function (result) {
+                    if (result.status === 'success') {
+                        Toast.fire({text: result.message});
+                        toPage(pageNum);
+                    } else {
+                        Toast.fire({text: result.message});
+                    }
+                }
+            });
+        });
+
+        $(document).on("click", ".btnEdit", function () {
+            $("#modalEdit").modal({
+                backdrop: "static"
+            });
+            $.each($(this).data(), function (name, value) {
+                $("#modalEdit :input[name='" + name + "']").val(value);
+            })
+        });
+
+        $(document).on('click', '#submitEdit', function () {
+            let data = $("#modalEdit :input").serializeJSON();
+            $.ajax({
+                url: "api/station",
+                type: "PUT",
+                data: data,
+                success: function (result) {
+                    Toast.fire({text: result.message});
+                    toPage(pageNum);
+                }
+            });
+        });
+
+        $(document).on('click', '.btnDel', function () {
+            $.ajax({
+                url: "api/station",
+                type: "PUT",
+                data: {
+                    id: $(this).data('id'),
+                    state: 0,
+                },
+                success: function (result) {
+                    Toast.fire({text: result.message});
+                    toPage(pageNum);
+                }
+            });
+        });
+
+    </script>
+</myscript>
+</body>
+</html>
